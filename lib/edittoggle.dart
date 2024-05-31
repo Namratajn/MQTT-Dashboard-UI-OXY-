@@ -39,6 +39,8 @@ class EditTileToggleState extends State<EditTileToggle>{
 
   int count = 0 ;
 
+  List<bool>  _switchOnOffList = [];
+
 
 
 
@@ -47,6 +49,7 @@ class EditTileToggleState extends State<EditTileToggle>{
     super.initState();
     updateToggleListView();
     updateListView();
+    _switchOnOffList;
   }
 
   void updateListView() {
@@ -510,6 +513,12 @@ class EditTileToggleState extends State<EditTileToggle>{
         onPressed: (){
 
 
+          //print(_switchOnOffList);
+          // int ind = toggleList.indexOf(toggle);
+          // _switchOnOffList[ind] = false ;
+          //_switchOnOffList[ind+1];
+
+
           if (tileNameController.text.isEmpty || onController.text.isEmpty  || offController.text.isEmpty) {
             Fluttertoast.showToast(msg: 'The Form field should not be empty');
           } else {
@@ -534,6 +543,11 @@ class EditTileToggleState extends State<EditTileToggle>{
                     toggle.offValue = offController.text;
               }
             }
+
+            // int ind = toggleList.indexOf(toggle);
+            //
+            // _switchOnOffList.insert(ind, false);
+
             _save(context);
           }
 
@@ -598,6 +612,7 @@ class EditTileToggleState extends State<EditTileToggle>{
     //   );
     //   return ;
     // }
+
 
 
       if (appBarTitle == 'Edit Tile') {

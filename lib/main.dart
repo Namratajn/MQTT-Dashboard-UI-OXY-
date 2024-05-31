@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:math';
 import 'package:provider/provider.dart';
 import 'package:first_oxy_project/createnewgroupform.dart';
@@ -81,11 +82,39 @@ class _MyHomePageState extends State<MyHomePage> {
   List<ToggleTile> addToggle = [];
 
 
+
+
+
+  void conversionOfString(){
+
+    List<dynamic> allTiles = [];
+
+  for(int i = 0 ; i < groupList.length;i++){
+     allTiles = jsonDecode(groupList[i].parentGroupOfTiles);
+  }
+  print(allTiles);
+  print(allTiles.length);
+  for(int i = 0 ; i < allTiles.length ;i++){
+
+    print(allTiles[i]);
+    print(allTiles[i][i]);
+
+  }
+
+  }
+
+
+
+
   @override
   void initState(){
     super.initState();
     updateToggleListView();
     updateListView();
+    getAllTileshere();
+    getGroupListView();
+    //_switchOnOffList ;
+    // fetchStringToTile();
     // _parentGroupToggle(0);
   }
 
@@ -152,14 +181,22 @@ class _MyHomePageState extends State<MyHomePage> {
       // Body
 
       body: Column(
-        children: <Widget>[
-          Expanded(child: getGroupListView()),
+
+        children: [
+           Expanded(child:
+           getGroupListView(),
+           ),
 
           Expanded(
-          child:  InkWell(
+          child:
+          InkWell(
               child: SingleChildScrollView(
-                child: ExpansionTile(
-                
+                child: toggleList.isEmpty
+                ? Container(
+
+                )
+                : ExpansionTile(
+
                   title: Text('All Tiles',),
                   // write a condition about on and offvalue
                   trailing: Container(height: 40,
@@ -184,15 +221,15 @@ class _MyHomePageState extends State<MyHomePage> {
                         ],
                       ) ,
                     )
-                
-                
+
+
                   ],
                   onExpansionChanged: (bool expanded) {
                     setState(() {
                       _showData = expanded;
                     });
                   },
-                
+
                 ),
               ),
               onTap: () {
@@ -211,7 +248,6 @@ class _MyHomePageState extends State<MyHomePage> {
       floatingActionButton: FloatingActionButton(
         tooltip: 'save group details',
         onPressed: () {
-
           showModalBottomSheet(
             context: context,
             builder: (context) {
@@ -223,6 +259,9 @@ class _MyHomePageState extends State<MyHomePage> {
                     children: [
                       InkWell(
                         onTap: () {
+                          // conversionOfString();
+
+
                           Navigator.pop(context); // done with it
                           navigateToDetail(
                               Group('', '', ''), 'Add Group');
@@ -231,25 +270,28 @@ class _MyHomePageState extends State<MyHomePage> {
                           }
                         },
 
-                        child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Icon(
-                                Icons.select_all_outlined,
-                                size: 30,
-                              ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10.0),
+                          child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Icon(
+                                  Icons.select_all_outlined,
+                                  size: 30,
+                                ),
 
-                              Text(
-                                    'Create new group',
-                                    style: TextStyle(
-                                        fontSize: 18, color: Colors.black),
-                                  ),
-                              Text('                          '),
-                              Icon(
-                                Icons.keyboard_arrow_right,
-                                size: 30,
-                              ),
-                            ]),
+                                Text(
+                                      'Create new group',
+                                      style: TextStyle(
+                                          fontSize: 18, color: Colors.black),
+                                    ),
+                                Text('                          '),
+                                Icon(
+                                  Icons.keyboard_arrow_right,
+                                  size: 30,
+                                ),
+                              ]),
+                        ),
                       ),
 
                       Divider(
@@ -610,10 +652,21 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<bool> _showExpBoolList =  List<bool>.filled(30,false);  //
 
+
+
+
+
   ListView getGroupListView() {
+
+    List<dynamic> allTiles = [];
+
+    // for(int i = 0 ; i < groupList.length;i++){
+    //   allTiles = jsonDecode(groupList[i].parentGroupOfTiles);
+    // }
 
     TextStyle? titleStyle = Theme.of(context).textTheme.subtitle1;
     return ListView.builder(
+
       itemCount :groupList.length,
       itemBuilder: (BuildContext context, int position) {
         return Padding(
@@ -623,23 +676,29 @@ class _MyHomePageState extends State<MyHomePage> {
                         elevation: 2.0,
                         // child: InkWell(
                           child: ExpansionTile(
-                            title: GestureDetector(
-                              child: Text(
+                            title: Text(
                                 this.groupList[position].groupName,
                                 style: titleStyle,
                               ),
-                              onTap: (){
-                                navigateToDetail(this.groupList[position],'Edit Note');
-                              },
-                            ),
+
                             subtitle: Text(this.groupList[position].groupDescription),
                             trailing: Container(
                               height: 40,
-                              width: 100,
-                              color: Colors.green,
+                              width: 120,
+
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
                                 children: [
+                                  IconButton(icon: Icon(Icons.edit),
+                                  onPressed: (){
+
+                                    navigateToDetail(this.groupList[position],'Edit Note');
+                                    // if(groupList[position].parentGroupOfTiles != '5' && toggleList.isNotEmpty){
+                                    //   _showAlertDialog();
+                                    // }
+
+
+                                  },) ,
                                   IconButton(icon: Icon(Icons.delete),
                                   onPressed: (){
                                     _delete(context, groupList[position]);
@@ -647,51 +706,41 @@ class _MyHomePageState extends State<MyHomePage> {
                                   Icon(
                                     _showExpBoolList[position] ? Icons.arrow_downward : Icons.arrow_forward_ios_rounded,
                                   ),
+
                                 ],
                               ),
                             ),
                             children: [
                               Container(
-                                height: 100,
+                                height: 150,
                                 ////implement the added tiles here
-                                child: ListView.builder(
-                                    itemBuilder: (context,index){
-                                  return Card(
-                                    child: ListTile(
-                                      title: Text(addToggle[index].tileName),
-                                    ),
-                                  );
-                                }, itemCount: addToggle.length,
-                                )
+                                // child: groupList[position].parentGroupOfTiles!=null
+                                child:
+                                // true==true
+                                //     ? Text('No tile is present')
+                                 //   :
+                              getTilesOfGroup(allTiles = jsonDecode(groupList[position].parentGroupOfTiles)),
                                 ////
                                 //child: ,
                               )
-
-
                             ],
                             onExpansionChanged: (bool expanded) {
                                      setState(() {
                                        _showExpBoolList[position] = expanded ;
                                     });
-                                  }
-
+                            }
 
 
                           ),
-                          // onTap: () {
-                          //   debugPrint("ListTile Tapped");
-                          //   Navigator.push(context, MaterialPageRoute(builder: (context){
-                          //     return CreateNewGroupState(this.groupList[position], 'Edit Note');
-                          //   }));
-                          //
-                          // },
+
 
                       ),
 
+
         );
 
-      },
 
+      },
 
     );
 
@@ -790,8 +839,12 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _deleteTile(BuildContext context,ToggleTile toggleTile) async{
-    int result = await databaseHelper.deleteToggle(toggleTile.id);
+    int ind = toggleList.indexOf(toggleTile);
+    _switchOnOffList[ind] = _switchOnOffList[ind+1];
 
+
+
+    int result = await databaseHelper.deleteToggle(toggleTile.id);
     if(result !=0){
       Fluttertoast.showToast(
           msg: "Tile is deleted ",
@@ -803,21 +856,56 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void navigateToDetail(Group group, String title) async {
-    bool? result  =
-        await Navigator.push(context, MaterialPageRoute(builder: (context) {
-          return CreateNewGroupState(group, title);
-    }));
-    if (result == true) {
-      updateListView();
-    }
+    List<dynamic> xyz = [];
+    // if(group.parentGroupOfTiles.isEmpty){
+    //   xyz=[[ ]];
+    // }else {
+      xyz = jsonDecode(group.parentGroupOfTiles);
+    //}
+
+      bool? result  =
+      await Navigator.push(context, MaterialPageRoute(builder: (context) {
+        return CreateNewGroupState(group, title,xyz);
+      }));
+      if (result == true) {
+        updateListView();
+      }
   }
 
 
 
+  void _showAlertDialog(){
+    showDialog(context: context,
+      builder: (BuildContext context){
+        return  AlertDialog(
+          title: Text('Rule for updating your CHECKED tiles only'),
+          content: Text('if you want your checked tile in your group then SINGLE TAP on it '
+              'and if you want to remove that tile then LONG PRESS on it '),
+          actions: [
+            ElevatedButton(onPressed: (){
+              Navigator.pop(context);
+            }, child: Text('Ok'))
+          ],
+        );
+      },);
+  }
+
   void navigateToEditTile(ToggleTile toggleTile, String title) async{
+
+
+
     bool? result = await Navigator.push(context, MaterialPageRoute(builder: (context){
       return EditTileToggle(toggleTile, title);
     }));
+
+    // this loop is to set the switch value of first one is false only
+    for(int i = 0 ; i < toggleList.length;i++){
+      // int ind = toggleList.indexOf(toggleTile);
+      _switchOnOffList[i] = _switchOnOffList[i+1];
+    }
+    //
+    //
+
     if (result == true) {
       updateToggleListView();
     }
@@ -850,7 +938,9 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-  List<bool> _switchOnOffList =  List<bool>.filled(30,false);
+  List<bool> _switchOnOffList = List<bool>.filled(30,false);
+
+  List<bool> _switchOnOffListinGroup =  List<bool>.filled(30,false);
 
   GridView getAllTileshere(){
     return GridView.builder(
@@ -861,7 +951,7 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       itemBuilder: ( BuildContext context,int index){
 
-        // _switchOnOffList.insert(index, false);
+        //_switchOnOffList.insert(index, false);
 
         return SingleChildScrollView(
           child: Padding(
@@ -884,6 +974,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     ),
 
                     trailing: PopupMenuButton(
+
                       onSelected: (value){
                         if(value==0){
                           navigateToEditTile(this.toggleList[index],'Edit Tile');
@@ -912,10 +1003,58 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  bool _checkValue = true ;
+  GridView getTilesOfGroup(List<dynamic> allTiles) {
+    return GridView.builder(
+      gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
+          maxCrossAxisExtent: 200,
+          mainAxisExtent: 120,
+          mainAxisSpacing: 10
+      ),
+      itemBuilder: ((context, index) {
+        return SingleChildScrollView(
+
+          child: Column(
+            children: [
+              // Text('Toggle'),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: allTiles[index][0] == '5'
+                     ? Container()
+                     : Card(
+                  child: ListTile(
+                    // leading: Icon(Icons.question_mark_outlined,color: Colors.grey),
+                    leading: Text('Toggle'),
+                    title: Text(allTiles[index][0]),
+                    subtitle: Switch(
+                      value: _switchOnOffListinGroup[index],
+                      onChanged: (value) {
+                        setState(() {
+                          _switchOnOffListinGroup[index] = value;
+                          value ?
+                          Fluttertoast.showToast(
+                              msg: 'the on value which is sent to the device is ${allTiles[index][1]}')
+                              : Fluttertoast.showToast(
+                              msg: 'the off value which is sent to the device is ${allTiles[index][2]}');
+                        });
+                      },
+                    ),
 
 
+                  ),
+
+                ),
+
+              ),
+            ],
+          ),
+        );
+      }),
+      itemCount: allTiles.length,
 
 
+    );
+  }
 
 
 }
@@ -925,6 +1064,24 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
+
+
+
+
+
+//
+// ListView.builder(
+// itemBuilder: (context,index){
+// return Card(
+// child: ListTile(
+// title: Text(
+// allTiles[index][index]
+// ),
+// ),
+// );
+// }, itemCount:allTiles.length,
+// )
+//
 
 
 

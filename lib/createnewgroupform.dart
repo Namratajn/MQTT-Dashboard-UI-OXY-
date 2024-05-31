@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'package:first_oxy_project/main.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -15,11 +16,12 @@ import 'package:first_oxy_project/Providers/show_tiles_groups.dart';
 class CreateNewGroupState extends StatefulWidget {
   final String appBarTitle;
   final Group group;
+  final List<dynamic> xyz ;
 
-  CreateNewGroupState(this.group,this.appBarTitle);
+  CreateNewGroupState(this.group,this.appBarTitle,this.xyz);
 
   @override
-  CreateNewGroup createState() => CreateNewGroup(this.group,this.appBarTitle);
+  CreateNewGroup createState() => CreateNewGroup(this.group,this.appBarTitle,this.xyz);
 }
 
 
@@ -27,6 +29,7 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
 
   final String appBarTitle;
   final Group group;
+  final List<dynamic> xyz ;
 
 
 
@@ -35,7 +38,7 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
 
   int count = 0;
 
-  CreateNewGroup(this.group, this.appBarTitle);
+  CreateNewGroup(this.group, this.appBarTitle,this.xyz);
 
   DatabaseHelper databaseHelper = DatabaseHelper();
   List<Group> groupList = [];
@@ -43,35 +46,33 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
   List<ToggleTile> toggleList = [];
 
 
-  List<List<ToggleTile>> allTiles = [];
 
 
+  List<bool> _switchOnOffList = List<bool>.filled(30,false);
+
+  List<ToggleTile> addToggle = [];
+
+
+
+  // allTiles list is a list of list that will store the data of all type of tiles
 
   final _formKey = GlobalKey<FormState>();
 
   bool _showAllTiles = false;
+
 
   @override
   void initState(){
     super.initState();
     updateToggleListView();
     updateListView();
-    // _parentGroupToggle(group.id);
+    print(xyz);
+    print(toggleList);
+    //_switchOnOffList;
+
   }
 
 
-  // void _parentGroupToggle(int gid) async{
-  //   final Future<Database> dbFuture = databaseHelper.initializeDatabase();
-  //   dbFuture.then((database) {
-  //     Future<List<ToggleTile>> parentToggleListFuture = databaseHelper.fetchGroupToggle(gid);
-  //     parentToggleListFuture.then((addGroupToggleList) {
-  //       setState(() {
-  //         this.addToggle = addGroupToggleList;
-  //         this.count = addGroupToggleList.length;
-  //       });
-  //     });
-  //   });
-  // }
 
   void updateListView() {
     final Future<Database> dbFuture = databaseHelper.initializeDatabase();
@@ -85,6 +86,8 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
       });
     });
   }
+
+
 
 
   void updateToggleListView() {
@@ -103,9 +106,11 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
 
   @override
   Widget build(BuildContext context) {
-    nameController.text = group.groupName;
-    discriptionController.text = group.groupDescription;
 
+    if(this.appBarTitle == 'Edit Note'){
+      nameController.text = group.groupName;
+      discriptionController.text = group.groupDescription;
+    }
 
 
     return Scaffold(
@@ -193,10 +198,13 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
                   ),
                   Divider(height: 30, thickness: 1,),
 
-                  Text('Group Content'),
+                  Text('Tiles Content'),
 
                   Expanded(
-                    child: getAllTileshere(),
+
+                    child : toggleList.isEmpty
+                        ? Container()
+                        : getAllTileshere(),
                   ),
                 ],
               ),
@@ -217,8 +225,34 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
             print('this is the addtoggle tile ${addToggle[i].tileName}');
           }
 
-          allTiles.insert(0, addToggle);
+          List<dynamic> allTiles = [];
+
+          //allTiles.insert(0, addToggle);
           print(allTiles);
+
+
+          for(int i = 0 ; i < addToggle.length;i++){
+              allTiles.add([addToggle[i].tileName,
+                addToggle[i].onValue,
+                addToggle[i].offValue,
+                addToggle[i].date]);
+          }
+
+          // for(int i = 0 ; i <allTiles.length;i++){
+          //   print(allTiles);
+          // }
+
+
+          print(allTiles);
+
+
+           String stringOfLists = jsonEncode(allTiles);
+          //
+          print('bhfrgvijberegtvpbgvtrgrvn $stringOfLists');
+          //
+          List<dynamic> listofList = jsonDecode(stringOfLists);
+
+          print('bhfrgvvpbgvtrgrvn ${listofList}');
 
 
 
@@ -240,21 +274,15 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
                 Fluttertoast.showToast(msg: 'The group already exist');
                 return ;
               } else{
-                group.groupName = nameController.text;
-                group.groupDescription = discriptionController.text;
-                // group.groupName=addToggle.toString();
-
+                group.groupName = nameController.text.trim();
+                group.groupDescription = discriptionController.text.trim();
+                group.parentGroupOfTiles = stringOfLists ;
                 //_parentGroupToggle(group.id);
               }
             }
             _save(context);
 
           }
-
-
-          // for(int i = 0 ; i <addToggle.length;i++){
-          //   print('this is the addtoggle tile ${addToggle[i].parentGroupId}    bfuebfhc ${addToggle[i].tileName}');
-          // }
 
         },
 
@@ -327,6 +355,7 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
     group.date = DateFormat.yMMMd().format(DateTime.now());
     int result;
     print("The app bar title is $appBarTitle");
+    // print("the list is ${group.parentGroupOfTiles}");
 
 
 
@@ -334,24 +363,6 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
       result = await databaseHelper.updateGroup(group);
     } else {
       result = await databaseHelper.insertGroup(group);
-      //var parGroupId= this.group.id;
-      // if(addToggle.isNotEmpty){
-      //   for(int i = 0 ; i < addToggle.length;i++){
-      //     await databaseHelper.insertToggle(ToggleTile(
-      //         addToggle[i].tileName,
-      //         addToggle[i].onValue,
-      //        addToggle[i].offValue,
-      //         addToggle[i].date,
-      //         //addToggle[i].parentGroupId=parGroupId
-      //         ));
-      //   }
-      //
-      //   List<Map<String,dynamic>> childrenToggle = await databaseHelper.getToggleMapList();
-      //   for(var child in childrenToggle){
-      //     print('This is the child $child');
-      //   }
-
-      //}
 
       Fluttertoast.showToast(
           msg: "Insert",
@@ -413,39 +424,142 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
       }
     }
 
+
+
   List<bool> _tileAddCheckBox =  List<bool>.filled(30,false);
+// bool s=false;
+// bool ss1(bool tileAddCheckBox){
+//   print(s);
+//   for(int i = 0 ; i < toggleList.length;i++){
+//     for(int j = 0 ; j < xyz.length;j++){
+//       if(toggleList[i].tileName == xyz[j][0]) {
+//         // {
+//         // _tileAddCheckBox[i] = true;
+//         s=true;
+//         print("case match");
+//         print(s);
+//         // return true;
+//       }else{
+//         s=false;
+//         print("case not match");
+//         print(s);
+//         // return false;
+//       }
+//         // print('yes you got it ${toggleList[i].tileName} is your equal to ${xyz[j][0]} ');
+//
+//       // }
+//     }
+//   }
+//   return s;
+// }
 
-
+bool sss=false;
+bool sssss= false ;
 
   GridView getAllTileshere() {
+
+
+
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(
             maxCrossAxisExtent: 200,
             mainAxisExtent: 120,
             mainAxisSpacing: 10
         ),
-        itemBuilder: (BuildContext context, int index) {
+
+
+
+        itemBuilder: (BuildContext context, int index ) {
+
+
+       if(sss==false){
+         sss=true;
+          for(int i = 0 ; i < toggleList.length;i++){
+            for(int j = 0 ; j < xyz.length;j++){
+              if(toggleList[i].tileName == xyz[j][0]){
+                _tileAddCheckBox[i] = true;
+                print('yes you got it ${toggleList[i].tileName} is your equal to ${xyz[j][0]} ');
+
+              }
+            }
+          }}
+
+
+       // if(sssss=false){
+       //   sssss=true ;
+         if(_tileAddCheckBox[index]==true){
+           if(addToggle.contains(toggleList[index])==false){
+             print(xyz);
+             print(addToggle);
+             addToggle.add(toggleList[index]);
+           }
+           //   else{
+           //   addToggle.remove(toggleList[index]);
+           // }
+         }
+       // }
+
+
+
+
           return Padding(
             padding: const EdgeInsets.all(10.0),
             child: Card(
               child: ListTile(
-                leading: Checkbox(
-                  value : _tileAddCheckBox[index],
-                  activeColor: Colors.green,
-                  onChanged:(value){
-                    setState(() {
-                          _tileAddCheckBox[index] = value! ;
-                          if(_tileAddCheckBox[index]==true){
-                            addToggle.add(toggleList[index]);
+                leading:
+          // InkWell(child:
+                     Checkbox(
+                      value : _tileAddCheckBox[index] ,
+                      // value : ss1(_tileAddCheckBox[index]) ,
+
+                      // = true
+                      //     ? _tileAddCheckBox[index] = false
+                      //     : _tileAddCheckBox[index] ,
+                      activeColor: Colors.green,
+
+                      onChanged:(newvalue){
+                        setState(() {
+                          print(newvalue);
+                          print(_tileAddCheckBox[index].toString());
+
+                          // Update the state of the checkbox
+                          _tileAddCheckBox[index] = newvalue!;
+
+                          if(_tileAddCheckBox[index] == true){
+                            //if(xyz.contains(toggleList[index])==false){
+                              addToggle.add(toggleList[index]);
+                            //}
+                            //addToggle.add(toggleList[index]);
                           }else{
+                            //xyz.removeAt(index);
                             addToggle.remove(toggleList[index]);
                           }
-                    });
-                  }
-                ),
+                          print(addToggle);
+                          print(xyz);
+                           for(int i = 0 ; i <addToggle.length;i++){
+                             print('your tile name is ${addToggle[i].tileName}');
+                           }
+
+                          // if(_tileAddCheckBox[index] == false){
+                          //   addToggle.add(toggleList[index]);
+                          //   print(addToggle[index]);
+                          // }
+
+                          print(newvalue);
+                          print(_tileAddCheckBox[index].toString());
 
 
-                title: Text(this.toggleList[index].tileName),
+                        });
+                      }
+                  ),
+                  // onLongPress: (){
+                  //   print(addToggle);
+                  //   addToggle.remove(toggleList[index]);
+                  // },
+                // ),
+
+
+                title: Text(index < toggleList.length ? toggleList[index].tileName : ''),
 
                 subtitle: Switch(
                   value: _switchOnOffList[index],
@@ -456,7 +570,6 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
                       Fluttertoast.showToast(msg: 'the on value which is sent to the device is ${this.toggleList[index].onValue}')
                           : Fluttertoast.showToast(msg: 'the off value which is sent to the device is ${this.toggleList[index].offValue}');
                     });
-
                   },
                 ),
               ),
@@ -464,20 +577,32 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
             ),
 
           );
-        }, itemCount: toggleList.length,
+        }, itemCount: toggleList.length > xyz.length
+          ? toggleList.length
+          : xyz.length,
       );
+
+
     }
-
-
-
-
-
-  List<bool> _switchOnOffList =  List<bool>.filled(30,false);
-
-  List<ToggleTile> addToggle = [];
-
-
 
 
 }
 
+//var parGroupId= this.group.id;
+// if(addToggle.isNotEmpty){
+//   for(int i = 0 ; i < addToggle.length;i++){
+//     await databaseHelper.insertToggle(ToggleTile(
+//         addToggle[i].tileName,
+//         addToggle[i].onValue,
+//        addToggle[i].offValue,
+//         addToggle[i].date,
+//         //addToggle[i].parentGroupId=parGroupId
+//         ));
+//   }
+//
+//   List<Map<String,dynamic>> childrenToggle = await databaseHelper.getToggleMapList();
+//   for(var child in childrenToggle){
+//     print('This is the child $child');
+//   }
+
+//}

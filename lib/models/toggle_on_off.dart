@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 class ToggleTile{
 
   int? _toggleid;
@@ -58,6 +60,7 @@ class ToggleTile{
   // foreign key parent group
 
 
+
   Map<String, dynamic > toMapToggle(){
     var map= Map<String, dynamic>();
     if( id != null){
@@ -76,6 +79,12 @@ class ToggleTile{
 
   }
 
+  ToggleTile.fromString(String string){
+    Map<String, dynamic> json = jsonDecode(string);
+    ToggleTile.fromMapObject(json);
+
+  }
+
   ToggleTile.fromMapObject(Map<String,dynamic> map){
     this._toggleid =map['toggleId'];
     this._tileName=map['tileName'];
@@ -87,5 +96,7 @@ class ToggleTile{
     //this._parentGroupId=map['parentGroupId'];
 
   }
+
+
 
 }

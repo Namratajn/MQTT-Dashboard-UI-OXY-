@@ -1,16 +1,19 @@
 
+import 'dart:convert';
+
 class Group{
 
   int? _id;
   String? _groupName;
   String? _groupDescription;
   String? _date;
-  //String? parentGroup ;
+  String? _parentGroupOfTiles ;
 
 
-  Group(this._groupName, this._groupDescription, this._date) ;
 
-  Group.withId(this._id, this._groupName, this._groupDescription, this._date);
+  Group(this._groupName, this._groupDescription, this._date,[this._parentGroupOfTiles]) ;
+
+  Group.withId(this._id, this._groupName, this._groupDescription, this._date,[this._parentGroupOfTiles]);
 
   int get id => _id ?? 0 ;
   String get date => _date!;
@@ -19,6 +22,16 @@ class Group{
 
 
 
+  String get parentGroupOfTiles => _parentGroupOfTiles ?? jsonEncode([['5']]) ;
+      //'no tiles' ;
+
+
+  set parentGroupOfTiles(String value) {
+
+      _parentGroupOfTiles = value;
+
+
+  }
 
   set date(String value) {
     _date = value;
@@ -48,7 +61,7 @@ class Group{
     map['groupName']= _groupName;
     map['groupDescription']= _groupDescription;
     map['date']=_date;
-
+    map['allTilesOfGroup']=_parentGroupOfTiles;
 
     return map;
   }
@@ -59,6 +72,7 @@ class Group{
     this._groupName=map['groupName'];
     this._groupDescription=map['groupDescription'];
     this._date=map['date'];
+    this._parentGroupOfTiles= map['allTilesOfGroup'];
 
   }
 

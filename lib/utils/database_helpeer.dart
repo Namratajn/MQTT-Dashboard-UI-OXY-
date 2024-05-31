@@ -15,6 +15,7 @@ class DatabaseHelper{
   String colGroupName='groupName';
   String colGroupDescription='groupDescription';
   String colDate='date';
+  String colParentGroupTiles = 'allTilesOfGroup';
  // List<List<String>> colParemtGroup=[];
 
 
@@ -67,7 +68,7 @@ class DatabaseHelper{
 
   void _createDb (Database db , int newVersion) async{
     
-    await db.execute('CREATE TABLE $groupTable($colId INTEGER PRIMARY KEY AUTOINCREMENT,$colGroupName TEXT, $colGroupDescription TEXT, $colDate TEXT )');
+    await db.execute('CREATE TABLE $groupTable($colId INTEGER PRIMARY KEY AUTOINCREMENT,$colGroupName TEXT, $colGroupDescription TEXT, $colDate TEXT ,$colParentGroupTiles TEXT)');
 
     await db.execute('CREATE TABLE IF NOT EXISTS $toggleTable($toggleId INTEGER PRIMARY KEY AUTOINCREMENT,$tileName TEXT,'
    '$onValue TEXT, $offValue TEXT,$toggleDate TEXT)');
