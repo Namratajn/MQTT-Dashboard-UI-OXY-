@@ -116,6 +116,7 @@ class CreateNewGroup extends State<CreateNewGroupState>  {
     return Scaffold(
       resizeToAvoidBottomInset: false,
       appBar: AppBar(
+          automaticallyImplyLeading: false,
           title: Text(this.appBarTitle)
       ),
       body: Form(
@@ -457,8 +458,6 @@ bool sss=false;
 bool sssss= false ;
 
   GridView getAllTileshere() {
-
-
 
       return GridView.builder(
         gridDelegate: SliverGridDelegateWithMaxCrossAxisExtent(

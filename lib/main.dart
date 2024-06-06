@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:math';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:first_oxy_project/createnewgroupform.dart';
 import 'package:first_oxy_project/edittoggle.dart';
@@ -16,6 +17,9 @@ import 'package:provider/single_child_widget.dart';
 
 import 'package:sqflite/sqflite.dart';
 import 'package:first_oxy_project/Providers/show_tiles_groups.dart';
+
+import 'Brokers/manage_broker.dart';
+import 'models/brokers_model.dart';
 
 void main() {
   runApp(
@@ -81,7 +85,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   List<ToggleTile> addToggle = [];
 
-
+  List<Brokers> brokerList =[] ;
 
 
 
@@ -105,14 +109,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
-
   @override
   void initState(){
     super.initState();
     updateToggleListView();
     updateListView();
     getAllTileshere();
-    getGroupListView();
+    updateBrokerList();
+    _showbrokerList();
+    //getGroupListView();
     //_switchOnOffList ;
     // fetchStringToTile();
     // _parentGroupToggle(0);
@@ -134,6 +139,15 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
+  double aa(){
+    for(int i = 0 ; i < groupList.length;i++){
+      if(_showExpBoolList[i]==true && toggleList.isNotEmpty){
+        return groupList.length * 180 ;
+      }
+
+    }
+      return groupList.length * 100;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -143,7 +157,10 @@ class _MyHomePageState extends State<MyHomePage> {
       updateListView();
     }
 
-
+    if(brokerList == null){
+      brokerList =[];
+      updateBrokerList();
+    }
 
     if(toggleList == null){
       toggleList = [];
@@ -158,6 +175,7 @@ class _MyHomePageState extends State<MyHomePage> {
     return Scaffold(
       resizeToAvoidBottomInset :false ,
       appBar: AppBar(
+        automaticallyImplyLeading: false,
         backgroundColor: Colors.white,
         title: Padding(
             padding: const EdgeInsets.only(left: 10),
@@ -180,21 +198,23 @@ class _MyHomePageState extends State<MyHomePage> {
 
       // Body
 
-      body: Column(
+      body: ListView(
+        scrollDirection: Axis.vertical,
 
         children: [
-           Expanded(child:
-           getGroupListView(),
-           ),
+          Container(
+            height: aa(),
+             child: getGroupListView(),
+          ),
 
-          Expanded(
-          child:
+
+          // Expanded(
+          //   //fit: FlexFit.tight,
+          // child:
           InkWell(
               child: SingleChildScrollView(
                 child: toggleList.isEmpty
-                ? Container(
-
-                )
+                ? Container()
                 : ExpansionTile(
 
                   title: Text('All Tiles',),
@@ -237,7 +257,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 //navigateToDetail(this.groupList[position],'Edit Note');
               },
             ),
-          )
+          //)
         ],
       ),
 
@@ -517,116 +537,12 @@ class _MyHomePageState extends State<MyHomePage> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 IconButton(
-                    onPressed: () {
-                      showModalBottomSheet(
-                        context: context,
-                        builder: (context) {
-                          return Padding(
-                            padding: const EdgeInsets.all(16),
-                            child: SingleChildScrollView(
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.account_circle_rounded,
-                                      size: 40,
-                                      color: Colors.black,
-                                    ),
-                                    title: Text(
-                                      'Xh',
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                    subtitle: Text('tcp://103.151.107.44'),
-                                  ),
-                                  ListTile(
-                                    leading: Icon(
-                                      Icons.account_circle_rounded,
-                                      size: 40,
-                                      color: Colors.black,
-                                    ),
-                                    title: Text(
-                                      'TF',
-                                      style: TextStyle(color: Colors.black),
-                                    ),
-                                    subtitle: Text('tcp://f'),
-                                    trailing: ElevatedButton(
-                                      child: Text('Pro'),
-                                      onPressed: () {
-                                        print('Button pressed');
-                                      },
-                                    ),
-                                  ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(left: 50),
-                                    child: OutlinedButton(
-                                      child: Text(
-                                        'Manage Brokers',
-                                        style: TextStyle(color: Colors.black),
-                                      ),
-                                      onPressed: () {
-                                        print('Button pressed');
-                                      },
-                                    ),
-                                  ),
-                                  Divider(
-                                    height: 30,
-                                    thickness: 1,
-                                  ),
-                                  Column(
-                                    children: [
-                                      ListTile(
-                                        leading: Icon(Icons.settings),
-                                        title: Text(
-                                          "Settings",
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ),
-                                      ListTile(
-                                        leading: Icon(Icons.support),
-                                        title: Text(
-                                          "Support the developer",
-                                          style: TextStyle(color: Colors.black),
-                                        ),
-                                      ),
-                                      ListTile(
-                                          leading: Icon(Icons.dark_mode_outlined),
-                                          title: Text(
-                                            "Dark Mode",
-                                            style: TextStyle(color: Colors.black),
-                                          ),
-                                          trailing: Switch(
-                                            value: _enable,
-                                            onChanged: (bool val) {
-                                              setState(() {
-                                                _enable = val;
-                                              });
-                                            },
-                                          ))
-                                    ],
-                                  ),
-                                  Divider(
-                                    height: 10,
-                                    thickness: 1,
-                                  ),
-                                  Row(
-                                    children: [
-                                      Text('                            Help  * '),
-                                      Text('About  * '),
-                                      Text('Unlock pro'),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      );
-                    },
+                    onPressed: _showBottomModelSheetMangaeBroker,
                     icon: Icon(Icons.dehaze)),
+
                 Text("                "),
                 Text("      "),
+
                 IconButton(
                     onPressed: () {
                       Fluttertoast.showToast(
@@ -645,6 +561,147 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
     );
   }
+
+
+
+  void updateBrokerList() async{
+    final Future<Database> dbfuture = databaseHelper.initializeDatabase();
+    dbfuture.then((database){
+      Future<List<Brokers>> brokerListFuture = databaseHelper.getBrokerList();
+      brokerListFuture.then((brokerList){
+        setState(() {
+          this.brokerList = brokerList;
+          this.count = brokerList.length ;
+        });
+
+      });
+    });
+  }
+
+  ListView _showbrokerList(){
+    return ListView.builder(itemBuilder: (BuildContext context, int index){
+      return Padding(
+        padding: const EdgeInsets.all(3.0),
+        child: Column(
+          children: [
+            ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Colors.black,
+                child: Text(this.brokerList[index].brokerName[0].toUpperCase() , style: TextStyle(color: Colors.white),) ,
+              ),
+              title: Text(this.brokerList[index].brokerName),
+              subtitle: Text(this.brokerList[index].brokerAddress),
+              // trailing: index == 0
+              //     ? Text('')
+              //     :OutlinedButton(onPressed: (){},child: Text('Pro',style: TextStyle(color: Colors.white),) ,style: ButtonStyle(
+              //   backgroundColor: MaterialStateProperty.all(Colors.pink.shade900)
+              // ),)
+            ),
+
+            // Divider(thickness: 1,)
+          ],
+        ),
+      );
+    },
+        itemCount: brokerList.length
+    );
+
+  }
+
+
+  //final key = GlobalKey();
+
+  void _showBottomModelSheetMangaeBroker() {
+    showModalBottomSheet(
+      //onstraints: BoxConstraints(maxHeight: key.currentContext?.size),
+      context: context,
+      builder: (context) {
+        return Padding(
+          padding: const EdgeInsets.all(16),
+          child: SingleChildScrollView(
+            child: Column(
+               mainAxisSize: MainAxisSize.min ,
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                Container(
+                  // height: brokerList.length * 80,
+                  height: 160 ,
+                  child:_showbrokerList(),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(left: 50),
+                  child: OutlinedButton(
+                    child: Text(
+                      'Manage Brokers',
+                      style: TextStyle(color: Colors.black),
+                    ),
+                    onPressed:navigateToBrokerAdd,
+                  ),
+                ),
+                Divider(
+                  height: 30,
+                  thickness: 1,
+                ),
+                Column(
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.settings),
+                      title: Text(
+                        "Settings",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    ListTile(
+                      leading: Icon(Icons.support),
+                      title: Text(
+                        "Support the developer",
+                        style: TextStyle(color: Colors.black),
+                      ),
+                    ),
+                    ListTile(
+                        leading: Icon(Icons.dark_mode_outlined),
+                        title: Text(
+                          "Dark Mode",
+                          style: TextStyle(color: Colors.black),
+                        ),
+                        trailing: Switch(
+                          value: _enable,
+                          onChanged: (bool val) {
+                            setState(() {
+                              _enable = val;
+                            });
+                          },
+                        ))
+                  ],
+                ),
+                Divider(
+                  height: 10,
+                  thickness: 1,
+                ),
+                Row(
+                  children: [
+                    Text('                            Help  * '),
+                    Text('About  * '),
+                    Text('Unlock pro'),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+
+
+  void navigateToBrokerAdd(){
+    Navigator.push(context, MaterialPageRoute(builder: (context){
+      return Broker();
+    }) );
+  }
+
 
   //bool _showExpTile = false ;
 
@@ -667,6 +724,7 @@ class _MyHomePageState extends State<MyHomePage> {
     TextStyle? titleStyle = Theme.of(context).textTheme.subtitle1;
     return ListView.builder(
 
+      scrollDirection: Axis.vertical,
       itemCount :groupList.length,
       itemBuilder: (BuildContext context, int position) {
         return Padding(
@@ -842,8 +900,6 @@ class _MyHomePageState extends State<MyHomePage> {
     int ind = toggleList.indexOf(toggleTile);
     _switchOnOffList[ind] = _switchOnOffList[ind+1];
 
-
-
     int result = await databaseHelper.deleteToggle(toggleTile.id);
     if(result !=0){
       Fluttertoast.showToast(
@@ -936,6 +992,7 @@ class _MyHomePageState extends State<MyHomePage> {
       });
     });
   }
+
 
 
   List<bool> _switchOnOffList = List<bool>.filled(30,false);
@@ -1085,3 +1142,34 @@ class _MyHomePageState extends State<MyHomePage> {
 
 
 
+// ListTile(
+// leading: Icon(
+// Icons.account_circle_rounded,
+// size: 40,
+// color: Colors.black,
+// ),
+// title: Text(
+// 'Xh',
+// style: TextStyle(color: Colors.black),
+// ),
+// subtitle: Text('tcp://103.151.107.44'),
+// ),
+// ListTile(
+// leading: Icon(
+// Icons.account_circle_rounded,
+// size: 40,
+// color: Colors.black,
+// ),
+// title: Text(
+// 'TF',
+// style: TextStyle(color: Colors.black),
+// ),
+// subtitle: Text('tcp://f'),
+// trailing: ElevatedButton(
+// child: Text('Pro'),
+// onPressed: () {
+// print('Button pressed');
+// },
+// ),
+// ),
+//
